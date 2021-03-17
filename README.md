@@ -1,8 +1,8 @@
 # PESS: Progressive Embedding of Security Services
 
-PESS is a solution to provision security services in softwarised networks, where network functions can be dynamically deployed on commodity hardware following the NFV paradigm, and the network is controlled using SDN technologies. In this context, the security services are defined as sequences (chains) of Virtual Security Network Functions (VSNFs), i.e. as software fuctions (e.g., Snort, Suricata, OpenDPI, etc.) , which are provisioned in the network infrastructure according to the specific Quality of Service (QoS) needs of user applications and the security policies defined by the Telecom Service Provider (TSP). TSP's security policies (given as an input to PESS) include: the kind of VSNFs (e.g., firewall, Intrusion Prevention System (IPS), etc.) that should be deployed for a specific class of applications, their order (e.g., firewall first, then an IPS, etc.), and more (e.g., a parental control should be installed close to the user's premises). 
+PESS is a solution to provision security services in softwarised networks, where network functions can be dynamically deployed on commodity hardware following the NFV paradigm, and the network is controlled using SDN technologies. In this context, the security services are defined as sequences (chains) of Virtual Security Network Functions (VSNFs), i.e. as software functions (e.g., Snort, Suricata, OpenDPI, etc.), which are provisioned in the network infrastructure according to the specific Quality of Service (QoS) needs of user applications and the security policies defined by the Telecom Service Provider (TSP). TSP's security policies (given as an input to PESS) include: the kind of VSNFs (e.g., firewall, Intrusion Prevention System (IPS), etc.) that should be deployed for a specific class of applications, their order (e.g., firewall first, then an IPS, etc.), and more (e.g., a parental control should be installed close to the user's premises). 
 
-The output of PESS is the mapping of the VSNFs onto the physical network (position of the VSNFs and one or more paths between them) and an updated model of the physical network taking into account the resources used to provision the service. The updated model is used as input for the next request. In this regard, PESS supports service provisioning in dynamic network scenarios, where the service requests are not known in advance. In contrast, advance knowledge of service requests is assumed by the majority of related works. 
+The output of PESS is the mapping of the VSNFs onto the physical network (position of the VSNFs and one or more paths between them) and an updated model of the physical network taking into account the resources used to provision the service. The updated model is used as an input for the next request. In this regard, PESS supports service provisioning in dynamic network scenarios, where the service requests are not known in advance. In contrast, advance knowledge of service requests is assumed by the majority of related works. 
 
 PESS has been evaluated on real-word network topologies such as GARR (https://www.garr.it/it/documenti/26-leaflet-garr-network) and Stanford (https://www.usenix.org/system/files/conference/nsdi12/nsdi12-final8.pdf). Its performance in terms of quality of the security service provisioning solutions (deviation from optimality) and scalability are available in the following research paper:
 
@@ -27,7 +27,7 @@ PESS has been implemented in Python v2.7 plus library NetworkX (https://networkx
 PESS requires the installation of a few Python tools and libraries. This can be done by using the ```conda``` software environment (https://docs.conda.io/projects/conda/en/latest/).
 We suggest the installation of ```miniconda```, a light version of ```conda```. ```miniconda``` is available for MS Windows, MacOSX and Linux and can be installed by following the guidelines available at https://docs.conda.io/en/latest/miniconda.html#. 
 
-In a Linux OS, execute the following command and follows the on-screen instructions:
+In a Linux OS, execute the following command and follow the on-screen instructions:
 
 ```
 bash Miniconda3-latest-Linux-x86_64.sh
@@ -49,11 +49,11 @@ For the sake of simplicity, we omit the command prompt ```(myenv)$``` in the fol
 
 ## Network models
 
-Two real-world network models are provided with the code: the topology of the Italian national computer network for universities and research (GARR, https://www.garr.it/en/infrastructures/network-infrastructure/our-network) and the topology of the Stanford backbone (www.usenix.org/system/files/conference/nsdi12/nsdi12-final8.pdf). The models are provided in form of text files formatted as follows:
+Two real-world network models are provided with the code: the topology of the Italian national computer network for universities and research (GARR, https://www.garr.it/en/infrastructures/network-infrastructure/our-network) and the topology of the Stanford backbone (www.usenix.org/system/files/conference/nsdi12/nsdi12-final8.pdf). The models are provided in the form of text files formatted as follows:
 
 - Number of nodes and links in the first line 
 - List of nodes, e.g. ```MI2 45.4667984 9.0961034 1 0```, where the first field is the node ID, followed by the node's coordinates (latitude and longitude), region ID and a flag that indicated whether the node is a *veto* node or not. Latitude and longitude are used to compute the link propagation delay between two nodes. If longitude and latitude are equal to zero, the resulting propagation delay will be zero. This also affects the representation of the topology map (see option ```-d``` below), which will show all the nodes in one single point overlapping with each other.
-- List of links, e.g. ```BN NA6 10000000000```, where the first two fields are the endpoints of the link, while the third in the bandwidth expressed in ```bits/sec```. Note that, the endpoints of the link must be defined in the list of nodes above.
+- List of links, e.g. ```BN NA6 10000000000```, where the first two fields are the endpoints of the link, while the third in the bandwidth expressed in ```bits/sec```. Note that the endpoints of the link must be defined in the list of nodes above.
 
 Of course, other topologies can be used, provided that their specification follows the schema detailed above.
 
@@ -63,10 +63,10 @@ The methods implemented in ```solver.py``` allow the user to evaluate the PESS h
 
 Script ```solver.py``` accepts the following parameters:
 
-- ```-e, ``` ```--experiment```: Identifier of the experiment to run: 1=baseline_comparison_random, 2=baseline_comparison_garr, 3=baseline_comparison_stanford, 4=scalability, 5=scalability_region. More details are provided below
-- ```-s, ``` ```--size ```: Size of the random networks (in terms of number of nodes)
-- ```-t, ``` ```--topology ```: Topology specification file. GARR and Stanford topology files are provided in folder ```data```. If not indicated, a random topology will be generated and used instead
-- ```-p```, ```--print_output ```: Print the output of the process. It can significantly slow down the execution
+- ```-e, ``` ```--experiment```: Identifier of the experiment to run: 1=baseline_comparison_random, 2=baseline_comparison_garr, 3=baseline_comparison_stanford, 4=scalability, 5=scalability_region (more details are provided below);
+- ```-s, ``` ```--size ```: Size of the random networks (in terms of number of nodes);
+- ```-t, ``` ```--topology ```: Topology specification file. GARR and Stanford topology files are provided in folder ```data```. If not indicated, a random topology will be generated and used instead;
+- ```-p```, ```--print_output ```: Print the output of the process. It can significantly slow down the execution;
 - ```-d```, ```--display_topology ```: Display the topology used for the experiment.
 
 With option ```--experiment```, one can select the experiment to run. Below, we provide a brief description of each experiment (more details are available in the paper).
@@ -89,18 +89,18 @@ As described above, option ```-e=1,2 or 3``` tells the script to execute the com
 
 ### Scalability
 
-The goal of scalability test is to show the performance of PESS at various network sizes (10,100,250,500,750 and 1000 nodes).  The two tests described in the paper (Section VII-D) are implemented in ```solver.py``` and can be executed by running one of the two commands:
+The goal of the scalability test is to show the performance of PESS at various network sizes (10,100,250,500,750 and 1000 nodes).  The two tests described in the paper (Section VII-D) are implemented in ```solver.py``` and can be executed by running one of the two commands:
 
 ```
 # python2 solver.py -e 4
 # python2 solver.py -t data/garr-topology -e 5
 ```
 
-In the experiment number 4 (first command), the network degree of the random topology is set to 1, 3 and 5. In the experiment number 5, the network degree is set to 5 (worst case scenario), while the region size is varied starting from 1 node, to 10%, 25% or 50% of the entire network. For comparison with a real-world scenario, here we also load the GARR topology, whose border region consists of 5 nodes out of 46.  
+In experiment number 4 (first command), the network degree of the random topology is set to 1, 3 and 5. In the experiment number 5, the network degree is set to 5 (worst case scenario), while the region size is varied starting from 1 node, to 10%, 25% or 50% of the entire network. For comparison with a real-world scenario, here we also load the GARR topology, whose border region consists of 5 nodes out of 46.  
 
 ### Test results
 
-The results of the tests are saved as text files in a folder named ```log```, which is created at the first execution.  Such files are named using the following schema:  PARAMETER-EXPERIMENT-DATE-TIME-#NETWORK_SIZE. Each line in this files is the report of a successful service provisioning. The list of rejected requests are instead saved in another file with the same name plus suffix ```-infeasible```. Below some examples:
+The results of the tests are saved as text files in a folder named ```log```, which is created at the first execution.  Such files are named using the following schema:  PARAMETER-EXPERIMENT-DATE-TIME-#NETWORK_SIZE. Each line in these files is the report of a successful service provisioning. The list of rejected requests is instead saved in another file with the same name plus suffix ```-infeasible```. Below are some examples:
 
 ```
 1000.0-GARR-PESS-2021-03-12-23-01-03-#20.log (load=1000, experiment=GARR-PESS, datetime=2021-03-12-23-01-03, nodes=20)
@@ -112,7 +112,7 @@ The results of the tests are saved as text files in a folder named ```log```, wh
 
 PARAMETER is the most representative parameter of the experiment.  In the case of the comparison with the application-agnostic approach, *Load*  is used to indicate the network load expressed in Erlang configured for the experiment (between 1000 and 20000). For the scalability experiments, the network degree and the region size are used instead.
 
-Each line summarises the outcome of a service provisioning with the following information:
+Each line summarises the outcome of provisioning a security service request with PESS and contains the following information:
 
 | Field                  | Description                                                  |
 | ---------------------- | ------------------------------------------------------------ |
