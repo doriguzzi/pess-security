@@ -27,7 +27,7 @@ This version of PESS is implemented in Python v3.8 and the NetworkX library (htt
 PESS requires the installation of a few Python tools and libraries. This can be done by using the ```conda``` software environment (https://docs.conda.io/projects/conda/en/latest/).
 We suggest the installation of ```miniconda```, a light version of ```conda```. ```miniconda``` is available for MS Windows, MacOSX and Linux and can be installed by following the guidelines available at https://docs.conda.io/en/latest/miniconda.html#. 
 
-In a Linux OS, execute the following command and follow the on-screen instructions:
+In the case of a Linux OS, execute the following command and follow the on-screen instructions:
 
 ```
 bash Miniconda3-latest-Linux-x86_64.sh
