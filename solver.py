@@ -18,7 +18,7 @@
 # Baseline comparison on random topologies: python2 solver.py -p -s 20 -e 1
 # Baseline comparison on the GARR network: python2 solver.py -p -t data/garr-topology -e 2
 # Baseline comparison on the Stanford backbone: python2 solver.py -p -t data/stanford-topology -e 3
-# Scalability test: python2 solver.py -t data/garr-topology -e 4
+# Scalability test: python2 solver.py -e 4
 # Scalability test with regions: python2 solver.py -t data/garr-topology -e 5
 
 import sys
@@ -43,7 +43,7 @@ test_set = {
     'scalability_region':5
 }
 
-def solve_it(test, input_data=None,network_size=None,print_output=True,graph=False):
+def solve_it(test, input_data=None, network_size=None, scalability_iterations=10, print_output=True,graph=False):
     lines = []
     parts = []
     ns = None
@@ -58,7 +58,7 @@ def solve_it(test, input_data=None,network_size=None,print_output=True,graph=Fal
         else:
             ns = int(network_size)
     else:
-        print "ERROR: Neither topology file nor network size provided!"
+        print ("ERROR: Neither topology file nor network size provided!")
         return
 
     # Embedding time computed on random networks of different degrees
@@ -66,7 +66,7 @@ def solve_it(test, input_data=None,network_size=None,print_output=True,graph=Fal
         now = datetime.now()
         log_file = now.strftime("SCALABILITY-%Y-%m-%d-%H-%M-%S")
         results_rnd = OrderedDict()
-        experiments = 1000
+        experiments = scalability_iterations
 
         # Random networks of different sizes (number of nodes) and different degrees
         for network_size in [10,100,250,500,750,1000]:
@@ -85,15 +85,14 @@ def solve_it(test, input_data=None,network_size=None,print_output=True,graph=Fal
                     security_service_index += 1
                     average_time += embed_time
                 results_rnd[network_size].append('{:07.3f}'.format(1000*average_time/experiments))
-
-        print np.array(results_rnd.items())
+        print (np.array(results_rnd.items()))
 
     # Embedding time measured at different region sizes
     elif test == test_set['scalability_region']:
         now = datetime.now()
         log_file = now.strftime("SCALABILITY-REGION-%Y-%m-%d-%H-%M-%S")
         results_rnd = OrderedDict()
-        experiments = 1000
+        experiments = scalability_iterations
 
         # Random networks of degree 5, different sizes (number of nodes) and different region sizes (as % on the number of nodes)
         for network_size in [10,100,250,500,750,1000]:
@@ -129,7 +128,7 @@ def solve_it(test, input_data=None,network_size=None,print_output=True,graph=Fal
             security_service_index += 1
             average_time += embed_time
         results_rnd["GARR"] = ['{:07.3f}'.format(1000 * average_time / experiments)]
-        print np.array(results_rnd.items())
+        print (np.array(results_rnd.items()))
 
     # comparison between baseline and PESS with random topologies
     elif test == test_set['baseline_comparison_random']:
@@ -270,6 +269,9 @@ def main(argv):
     parser.add_argument('-e', '--experiment', default=1, type=int,
                         help='Experiment types: 1=baseline_comparison_random, 2=baseline_comparison_garr, 3=baseline_comparison_stanford, 4=scalability, 5=scalability_region')
 
+    parser.add_argument('-i', '--iterations', default=10, type=int,
+                        help='Number of iterations of the scalability tests (the results are reported as the average time')
+
     parser.add_argument('-t', '--topology', nargs='+', type=str,
                         help='Topology specification file. If not indicated, a random topology will be generated instead.')
 
@@ -286,9 +288,9 @@ def main(argv):
         network_size = args.size
 
     if args.experiment is None:
-        print help_string
+        print (help_string)
     else:
-        solve_it(args.experiment,input_data,network_size,args.print_output,args.display_topology)
+        solve_it(args.experiment,input_data,network_size,args.iterations, args.print_output,args.display_topology)
 
 if __name__ == "__main__":
     main(sys.argv[1:])

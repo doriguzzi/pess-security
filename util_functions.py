@@ -104,8 +104,8 @@ def draw_graph(nodes, edges, graph_layout='shell',
     # assigning the weights to the nodes: CPU core and RAM megabytes
     for node in nodes:
         #G.node[node.label]['weight'] = node.capacity
-        G.node[nodes[node]['label']]['label'] = nodes[node]['label']
-        G.node[nodes[node]['label']]['pos'] = (nodes[node]['lon'],nodes[node]['lat'])
+        G.nodes[nodes[node]['label']]['label'] = nodes[node]['label']
+        G.nodes[nodes[node]['label']]['pos'] = (nodes[node]['lon'],nodes[node]['lat'])
 
     # these are different layouts for the network you may try
     # shell seems to work best

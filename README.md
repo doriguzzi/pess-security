@@ -22,7 +22,7 @@ This repository collects the Python scripts developed to implement and evaluate 
 
 ## Installation
 
-PESS has been implemented in Python v2.7 plus library NetworkX (https://networkx.org/) to handle the network topologies.
+This version of PESS is implemented in Python v3.8 and the NetworkX library (https://networkx.org/) to handle the network topologies. The original version, implemented in Python v2.7 and evaluated in the aforementioned paper, is available in branch *pess-python-2.7*.
 
 PESS requires the installation of a few Python tools and libraries. This can be done by using the ```conda``` software environment (https://docs.conda.io/projects/conda/en/latest/).
 We suggest the installation of ```miniconda```, a light version of ```conda```. ```miniconda``` is available for MS Windows, MacOSX and Linux and can be installed by following the guidelines available at https://docs.conda.io/en/latest/miniconda.html#. 
@@ -33,19 +33,19 @@ In a Linux OS, execute the following command and follow the on-screen instructio
 bash Miniconda3-latest-Linux-x86_64.sh
 ```
 
-Then create a new ```conda``` environment (called ```myenv```) based on Python 2.7 and including the required packages:
+Then create a new ```conda``` environment (called ```python38```) based on Python 3.8 and including the required packages:
 
 ```
-conda create -n myenv python=2.7 numpy scipy matplotlib networkx=1.11
+conda create -n python38 python=3.8 numpy scipy matplotlib=3.4.3 networkx=2.6.3
 ```
 
-Activate the new ```myenv``` environment:
+Activate the new ```python38``` environment:
 
 ```
-conda activate myenv
+conda activate python38
 ```
 
-For the sake of simplicity, we omit the command prompt ```(myenv)$``` in the following example commands in this README.   ```(myenv)$``` indicates that we are working inside the ```myenv``` execution environment, which provides all the required libraries and tools. If the command prompt is not visible, re-activate the environment as explained above.
+For the sake of simplicity, we omit the command prompt ```(python38)$``` in the following example commands in this README.   ```(python38)$``` indicates that we are working inside the ```python38``` execution environment, which provides all the required libraries and tools. If the command prompt is not visible, re-activate the environment as explained above.
 
 ## Network models
 
@@ -64,6 +64,7 @@ The methods implemented in ```solver.py``` allow the user to evaluate the PESS h
 Script ```solver.py``` accepts the following parameters:
 
 - ```-e, ``` ```--experiment```: Identifier of the experiment to run: 1=baseline_comparison_random, 2=baseline_comparison_garr, 3=baseline_comparison_stanford, 4=scalability, 5=scalability_region (more details are provided below);
+- ```-i, ``` ```--iterations ```: Number of iterations performed during a scalability experiment;
 - ```-s, ``` ```--size ```: Size of the random networks (in terms of number of nodes);
 - ```-t, ``` ```--topology ```: Topology specification file. GARR and Stanford topology files are provided in folder ```data```. If not indicated, a random topology will be generated and used instead;
 - ```-p```, ```--print_output ```: Print the output of the process. It can significantly slow down the execution;
@@ -80,9 +81,9 @@ The test executes two experiments in parallel using two identical copies of the 
 The comparison can be performed in three different scenarios: the GARR Italian computer network, the Stanford backbone topology, and random networks (Barabási-Albert model). Dependently on the scenario, the test can be started as follow:
 
 ```
-# python2 solver.py -p -s 20 -e 1
-# python2 solver.py -p -t data/garr-topology -e 2
-# python2 solver.py -p -t data/stanford-topology -e 3
+# python solver.py -p -s 20 -e 1
+# python solver.py -p -t data/garr-topology -e 2
+# python solver.py -p -t data/stanford-topology -e 3
 ```
 
 As described above, option ```-e=1,2 or 3``` tells the script to execute the comparison between PESS and the baseline on a random topology,  the GARR network or  the Stanford backbone topology respectively. Option ```-s 20``` specifies the number of nodes in the random networks, while option ```-p``` enables the script's output on the terminal.
@@ -92,11 +93,12 @@ As described above, option ```-e=1,2 or 3``` tells the script to execute the com
 The goal of the scalability test is to show the performance of PESS at various network sizes (10,100,250,500,750 and 1000 nodes).  The two tests described in the paper (Section VII-D) are implemented in ```solver.py``` and can be executed by running one of the two commands:
 
 ```
-# python2 solver.py -e 4
-# python2 solver.py -t data/garr-topology -e 5
+# python solver.py -e 4 -i 10
+# python solver.py -t data/garr-topology -e 5 -i 10
 ```
 
 In experiment number 4 (first command), the network degree of the random topology is set to 1, 3 and 5. In the experiment number 5, the network degree is set to 5 (worst case scenario), while the region size is varied starting from 1 node, to 10%, 25% or 50% of the entire network. For comparison with a real-world scenario, here we also load the GARR topology, whose border region consists of 5 nodes out of 46.  
+The experiments can be iterated several times, as indicated with option ```-i``` (in the above examples set to 10). Thus,  at each iteration, a random security service is generated and provisioned onto an empty network, and the  provisioning time recorded. The result of the experiment is the average provisioning time computed as the average  time of the 10 iterations (or any other number indicated with option ```-i```).
 
 ### Test results
 

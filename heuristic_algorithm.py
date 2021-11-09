@@ -38,7 +38,7 @@ class heuristic_algorithm:
         self.veto_region = list(physical_network.veto_region.keys())
         self.network_cpu_capacity = physical_network.cpu_capacity
         self.network_bandwidth_capacity = physical_network.bandwidth_capacity
-        self.average_residual_bandwidth = sum(edge['residual_bandwidth'] for edge in self.edges.itervalues() if edge['type'] == 'physical')/self.edge_count
+        self.average_residual_bandwidth = sum(edge['residual_bandwidth'] for edge in self.edges.values() if edge['type'] == 'physical')/self.edge_count
         self.security_service_index = security_service_index
         self.old_chain_test = old_chain_test
         self.filename = log_file
@@ -69,8 +69,8 @@ class heuristic_algorithm:
 
         if len(best_paths) == 0:
             if print_result is True:
-                print "-----------------------"
-                print "Infeasible security service! No paths available."
+                print ("-----------------------")
+                print ("Infeasible security service! No paths available.")
             if save_stats is True:
                 solution_string = -1
                 consumed_cpu, consumed_bandwidth = self.pn.consumed_resources()
@@ -96,8 +96,8 @@ class heuristic_algorithm:
                     break
             if len(solution) == 0: # all the candidate embeddings compromise the latency requirements of old chains
                 if print_result is True:
-                    print "-----------------------"
-                    print "The new solution solution compromises the latency bounds of old chains. Infeasible security service!"
+                    print ("-----------------------")
+                    print ("The new solution solution compromises the latency bounds of old chains. Infeasible security service!")
                 if save_stats is True:
                     solution_string = -2
                     consumed_cpu, consumed_bandwidth = self.pn.consumed_resources()
@@ -122,10 +122,10 @@ class heuristic_algorithm:
         self.pn.store_chain_mapping(self.security_service_index, self.security_service, solution, vnf_node_mapping, vlink_edge_mapping) #here we store some information of the new chains for the future
         if print_result is True:
             self.print_solution(vnf_node_mapping, vlink_edge_mapping)
-            print "-----------------------"
-            print "Objective value: ", solution['total_cost']
-            print "Consumed resources (cpu, bandwidth): ", consumed_cpu, consumed_bandwidth
-            print "-----------------------"
+            print ("-----------------------")
+            print ("Objective value: ", solution['total_cost'])
+            print ("Consumed resources (cpu, bandwidth): ", consumed_cpu, consumed_bandwidth)
+            print ("-----------------------")
         if save_stats is True:
             # here we save the whole solution
             solution_string = 0#self.solution_to_string(vnf_node_mapping, vlink_edge_mapping)
@@ -261,7 +261,7 @@ class heuristic_algorithm:
 
         # second, we look for better nodes excluding the ones in the veto region and already included in the current paths
         good_nodes = [current_best_node] if current_best_node is not None else []
-        for n_index, node in self.nodes.iteritems():
+        for n_index, node in self.nodes.items():
             if n_index not in path and node['residual_cpu'] > current_best_residual_cpu and node['veto'] == 0:
                 good_nodes.append(n_index)
 
@@ -271,7 +271,7 @@ class heuristic_algorithm:
         subpaths_start = self.get_best_path_light(start, candidate_best_nodes, required_bandwidth)
         subpaths_dest = self.get_best_path_light(destination, candidate_best_nodes, required_bandwidth)
 
-        for best_node, subpath_from_start in subpaths_start.iteritems():
+        for best_node, subpath_from_start in subpaths_start.items():
             if best_node in subpaths_dest:
                 subpath_from_dest = list(reversed(subpaths_dest[best_node]))
                 del subpath_from_dest[0] # this node is already included in subpath_from_start
@@ -294,7 +294,7 @@ class heuristic_algorithm:
 
         # we look for nodes with enough residual cpu
         good_nodes = []
-        for n_index, node in self.nodes.iteritems():
+        for n_index, node in self.nodes.items():
             if n_index not in nodes_in_paths and node['residual_cpu'] > required_cpu and node['veto'] == 0:
                 good_nodes.append(n_index)
 
@@ -306,7 +306,7 @@ class heuristic_algorithm:
         for destination in destinations:
             subpaths_dest[destination] = self.get_best_path_light(destination, candidate_best_nodes, required_bandwidth)
 
-        for best_node, subpath_from_start in subpaths_start.iteritems():
+        for best_node, subpath_from_start in subpaths_start.items():
             for destination in destinations:
                 if best_node in subpaths_dest[destination]:
                     subpath_from_dest = list(reversed(subpaths_dest[destination][best_node]))
@@ -445,7 +445,7 @@ class heuristic_algorithm:
                         tmp_embedding[path[-1]] = [vnf]
 
             active_nodes=0
-            for key,value in tmp_embedding.iteritems():
+            for key,value in tmp_embedding.items():
                 if value != [0] and value != [c[0]['length'] - 1]: #excluding those nodes hosting only "app" and "remote"
                     active_nodes +=1
 
@@ -472,7 +472,7 @@ class heuristic_algorithm:
 
             index = 0
             for node in enumerate(tmp_path):
-                if index < len(tmp_embedding) and node[1] == tmp_embedding.keys()[index]:
+                if index < len(tmp_embedding) and node[1] == list(tmp_embedding.keys())[index]:
                     embeddings[c_index][node] = tmp_embedding[node[1]]
                     index +=1
                 else:
@@ -500,7 +500,7 @@ class heuristic_algorithm:
             bandwidth = c[0]['bandwidth']
             for vlink in vlink_edge_mapping[c_index]:
                 for edge in vlink:
-                    if self.edges[edge]['type'] is 'physical':  # we decrease the residual bandwidth only for "real" links
+                    if self.edges[edge]['type'] == 'physical':  # we decrease the residual bandwidth only for "real" links
                         self.edges[(edge[0],edge[1])]['residual_bandwidth'] -= bandwidth # the direction of the chain
                         self.edges[(edge[1],edge[0])]['residual_bandwidth'] -= bandwidth # and the opposite direction
 
@@ -570,7 +570,10 @@ class heuristic_algorithm:
                 for index in range(previous_index, len(vnf_node_mapping[c_index])-1):
                     pair = vnf_node_mapping[c_index][index]
                     pair_next = vnf_node_mapping[c_index][index+1]
-                    if pair[0] < u+1:
+                    physical_node = pair[0]
+                    if physical_node == None:
+                        physical_node = -1
+                    if physical_node < u + 1:
                         vlinks.append((pair[1],pair_next[1]))
                     else:
                         previous_index = index
@@ -582,17 +585,17 @@ class heuristic_algorithm:
     # print vnfs
     def print_solution(self, vnf_node_mapping, vlink_edge_mapping):
         for c_index, c in enumerate(self.security_service):
-            print "-----------------------"
-            print "Chain #", c_index
+            print ("-----------------------")
+            print ("Chain #", c_index)
             for u in vnf_node_mapping[c_index]:
                 if u[0] is not None:
-                    print c[0][u[0]]['id'], self.nodes[u[1]]['label']
+                    print (c[0][u[0]]['id'], self.nodes[u[1]]['label'])
 
         for c_index, c in enumerate(self.security_service):
-            print "-----------------------"
-            print "Chain #", c_index
+            print ("-----------------------")
+            print ("Chain #", c_index)
             for u in range(len(c[1])):
-                print self.security_service[c_index][0][c[1][u][0]]['id'], self.security_service[c_index][0][c[1][u][1]]['id'],[self.edges[edge]['label'] for edge in vlink_edge_mapping[c_index][u]]
+                print (self.security_service[c_index][0][c[1][u][0]]['id'], self.security_service[c_index][0][c[1][u][1]]['id'],[self.edges[edge]['label'] for edge in vlink_edge_mapping[c_index][u]])
 
                 # print vnfs
 

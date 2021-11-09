@@ -130,7 +130,7 @@ class physical_network:
 
         # node properties: 10% of region nodes
         for i in range(self.node_count):
-            self.neighbors_map[i] = self.nxGraph.neighbors(i)
+            self.neighbors_map[i] = [n for n in self.nxGraph.neighbors(i)] #self.nxGraph.neighbors(i)
             neighbors = len(list(self.neighbors_map[i]))
             self.nodes[i] = {'label': "N" + str(i), 'lat': random.randint(0,1000), 'lon': random.randint(0,1000),
                         'region': 0 if region_node_index == 0 else 1 if i%region_node_index == 0 else 0, # 1 region node every "region_node_index". In the GARR network region_node_index = ~11
@@ -181,7 +181,7 @@ class physical_network:
 
         # we need this second loop to update the bandwidth capacity
         self.bandwidth_capacity = 0
-        for edge in self.edges.itervalues():
+        for edge in self.edges.values():
             if edge['type'] == 'physical':
                 self.bandwidth_capacity += edge['bandwidth']
 
@@ -197,7 +197,7 @@ class physical_network:
 
         # we need this second loop to update the bandwidth capacity
         self.bandwidth_capacity = 0
-        for edge in self.edges.itervalues():
+        for edge in self.edges.values():
             if edge['type'] == 'physical':
                 self.bandwidth_capacity += edge['bandwidth']
 
@@ -213,14 +213,14 @@ class physical_network:
 
         # we need this second loop to update the bandwidth capacity
         self.bandwidth_capacity = 0
-        for edge in self.edges.itervalues():
+        for edge in self.edges.values():
             if edge['type'] == 'physical':
                 self.bandwidth_capacity += edge['bandwidth']
 
     # method to assign specific cpu resources to the physical network
     def set_cpu_resources(self, cpu):
         self.cpu_capacity = 0
-        for node in self.nodes.itervalues():
+        for node in self.nodes.values():
             node['cpu'] = cpu
             node['residual_cpu'] = cpu
             self.cpu_capacity += node['cpu']
@@ -229,7 +229,7 @@ class physical_network:
     def set_average_cpu_resources(self, cpu_average):
         self.cpu_capacity = 0
         cpu_delta = cpu_average*0.10 #10%
-        for node in self.nodes.itervalues():
+        for node in self.nodes.values():
             new_cpu = int(random.uniform(cpu_average-cpu_delta, cpu_average+cpu_delta))
             node['cpu'] = new_cpu
             node['residual_cpu'] = new_cpu
@@ -238,24 +238,24 @@ class physical_network:
     # method to assign specific cpu resources to the physical network
     def set_exact_cpu_resources(self, new_cpu):
         self.cpu_capacity = 0
-        for node in self.nodes.itervalues():
+        for node in self.nodes.values():
             node['cpu'] = new_cpu
             node['residual_cpu'] = new_cpu
             self.cpu_capacity += node['cpu']
 
     def reset_residual_resources(self):
-        for edge in self.edges.itervalues():
+        for edge in self.edges.values():
             edge['residual_bandwidth'] = edge['bandwidth']
 
-        for node in self.nodes.itervalues():
+        for node in self.nodes.values():
             node['residual_cpu'] = node['cpu']
 
     # generate networkx graph from a network model
     def generate_graph(self,nodes,edges):
         G = nx.Graph()
-        for node in nodes.iterkeys():
+        for node in list(nodes):
             G.add_node(node)
-        for e_index, edge in edges.iteritems():
+        for e_index, edge in edges.items():
             if edge['type'] == 'physical':
                 G.add_edge(e_index[0],e_index[1])
 
@@ -287,20 +287,20 @@ class physical_network:
 
     # generate app node outside the border and the veto region
     def generate_app_node(self):
-        app_node_index = random.sample(self.nodes,1)[0]
+        app_node_index = random.sample(list(self.nodes),1)[0]
         border_indexes = self.border_region.keys()
         veto_indexes = self.veto_region.keys()
         while app_node_index in border_indexes or app_node_index in veto_indexes:
-            app_node_index = random.sample(self.nodes, 1)[0]
+            app_node_index = random.sample(list(self.nodes), 1)[0]
         return app_node_index
 
     # generate remote node inside the network but outside the border and the veto region
     def generate_remote_node(self,startpoint):
-        remote_node_index = random.sample(self.nodes, 1)[0]
+        remote_node_index = random.sample(list(self.nodes), 1)[0]
         border_indexes = self.border_region.keys()
         veto_indexes = self.veto_region.keys()
         while remote_node_index in border_indexes or remote_node_index in veto_indexes or remote_node_index == startpoint:
-            remote_node_index = random.sample(self.nodes, 1)[0]
+            remote_node_index = random.sample(list(self.nodes), 1)[0]
         return remote_node_index
 
     def consumed_resources(self):
@@ -317,7 +317,7 @@ class physical_network:
     def consumed_region_cpu_resources(self,r_index):
         residual_cpu = 0.0
         total_cpu = 0.0
-        for n_index, node in self.nodes.iteritems():
+        for n_index, node in self.nodes.items():
             if node['region'] == r_index:
                 total_cpu += node['cpu']
                 residual_cpu += node['residual_cpu']
@@ -341,7 +341,8 @@ class physical_network:
     # delete chains based on a given probability
     def delete_random_chains(self,end_prob):
         chain_indexes = []
-        for key,chains in self.service_map.items():
+        temp_map = self.service_map.copy()
+        for key,chains in temp_map.items():
             x = random.random()
             if x < end_prob:
                 chain_indexes += chains
@@ -364,7 +365,7 @@ class physical_network:
                 self.nodes[node[0]]['residual_cpu'] += node[1]
             del self.chain_map[chain[0]]
         # here we remove the selected entries in the region_cpu_map
-        for index, region_list in self.region_cpu_map.iteritems():
+        for index, region_list in self.region_cpu_map.items():
             chains_to_remove_list = copy.deepcopy(chains_to_remove_from_region_cpu_map)
             for chain in region_list[:]:
                 if chain[0] in chains_to_remove_list:
@@ -402,7 +403,7 @@ class physical_network:
                         self.chain_map[self.chain_index]['regions'][self.nodes[map[1]]['region']] = {'cpu': c[0][map[0]]['cpu'],'count':1}
 
             # percentage of the CPU used in each region
-            for index, value in self.chain_map[self.chain_index]['regions'].iteritems():
+            for index, value in self.chain_map[self.chain_index]['regions'].items():
                 self.chain_map[self.chain_index]['regions'][index]['cpu'] = float(value['cpu'])/total_cpu
 
             # here we find minimum average residual CPU capacity that allows he fulfillment of the latency constraint
@@ -421,7 +422,7 @@ class physical_network:
 
             # here we store the average CPU requirements for each chain in each region
             # we keep the one with highest requirement in front position
-            for index, value in self.chain_map[self.chain_index]['regions'].iteritems():
+            for index, value in self.chain_map[self.chain_index]['regions'].items():
                 if index not in self.region_cpu_map:
                     self.region_cpu_map[index]=[]
                 average_required_cpu = self.chain_map[self.chain_index]['min_total_gir'] * value['cpu']/value['count']
@@ -449,7 +450,7 @@ class physical_network:
         average_residual_cpu = self.average_residual_cpu_regions(security_service, vnf_node_mapping)
         temporary_residual_cpu = self.temporary_residual_cpu(security_service, vnf_node_mapping)
 
-        for index, value in self.region_cpu_map.iteritems():
+        for index, value in self.region_cpu_map.items():
             if len(value) > 0:
                 if average_residual_cpu[index] < value[0][1]:
                     # the first chain failed the first check, then we perform a precise check for it and for some of the other chains
@@ -513,7 +514,7 @@ class physical_network:
                     average_residual_cpu[self.nodes[map[1]]['region']] -= Guc
 
 
-        for index, value in average_residual_cpu.iteritems():
+        for index, value in average_residual_cpu.items():
             average_residual_cpu[index] = value/average_residual_count[index]
 
         return average_residual_cpu
