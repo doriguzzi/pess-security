@@ -213,7 +213,7 @@ class virtual_network:
 
         return {'user_node' : startpoint, 'remote_node' : endpoint, 'service' : new_service}
 
-    # generation of random unidirectional point to point security services (no border region)
+    # generation of random unidirectional point to point security services (no border region). Only used for scalability tests.
     def generate_p2p_security_service(self,start=None,end=None,max_chains = None, nr_vnf = None, bandwidth=None, latency = None, packet_size= None):
         new_service = []
         chains = random.randint(1,MAX_CHAINS) if max_chains is None else random.randint(1,max_chains)
