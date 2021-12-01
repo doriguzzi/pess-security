@@ -36,7 +36,7 @@ bash Miniconda3-latest-Linux-x86_64.sh
 Then create a new ```conda``` environment (called ```myenv```) based on Python 2.7 and including the required packages:
 
 ```
-conda create -n myenv python=2.7 numpy scipy matplotlib networkx=1.11
+conda create -n myenv python=2.7 numpy scipy matplotlib networkx=1.11 decorator==4.4.2
 ```
 
 Activate the new ```myenv``` environment:
