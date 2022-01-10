@@ -38,7 +38,7 @@ class virtual_network:
     def generate_vnfs(self):
         vnfs = []
         for i in range(SECURITY_VNFS):
-            vnfs.append(OrderedDict([('id', 'vnf' + str(i)), ('cpu', min(i+1,MAX_CPU)), ('stateful', True if i%2 is 1 else False), ('border', True if i>=self.border_index else False)]))
+            vnfs.append(OrderedDict([('id', 'vnf' + str(i)), ('cpu', min(i+1,MAX_CPU)), ('stateful', True if i%2 == 1 else False), ('border', True if i>=self.border_index else False)]))
         return vnfs
 
     # generate custom VNFs for debugging purposes
@@ -107,9 +107,9 @@ class virtual_network:
                         Upairs.append((i,i+1))
                 new_service.append((U,Upairs))
 
-            if self.debug is False and outgoing is 1: # we check the outgoing value to avoid having empty services
+            if self.debug is False and outgoing == 1: # we check the outgoing value to avoid having empty services
                 incoming = 0
-            elif self.debug is False and outgoing is 0: # we check the outgoing value to avoid having empty services
+            elif self.debug is False and outgoing == 0: # we check the outgoing value to avoid having empty services
                 incoming = 1
             elif self.debug is True: # in case of debug, we do not want the opposite chain
                 incoming = 0
